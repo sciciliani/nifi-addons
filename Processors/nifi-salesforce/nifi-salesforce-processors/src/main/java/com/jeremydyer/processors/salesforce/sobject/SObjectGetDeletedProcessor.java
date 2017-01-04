@@ -50,7 +50,7 @@ public class SObjectGetDeletedProcessor
 
     //https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_getdeleted.htm
 
-    private static final String SALESFORCE_OP = "sobject";
+    private static final String SALESFORCE_OP = "sobjects";
 
     public static final PropertyDescriptor SOBJECT_NAME = new PropertyDescriptor
             .Builder().name("SObject that will be interrogated for deleted records")
@@ -64,6 +64,8 @@ public class SObjectGetDeletedProcessor
             .Builder().name("SObject deleted start date")
             .description("ISO 8601 formatted start date for looking for deleted records.")
             .required(true)
+            .defaultValue("2016-01-01")
+            .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
             .expressionLanguageSupported(true)
             .build();
 
@@ -71,6 +73,8 @@ public class SObjectGetDeletedProcessor
             .Builder().name("SObject deleted end date")
             .description("ISO 8601 formatted end date for looking for deleted records.")
             .required(true)
+            .defaultValue("2017-01-01")
+            .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
             .expressionLanguageSupported(true)
             .build();
 

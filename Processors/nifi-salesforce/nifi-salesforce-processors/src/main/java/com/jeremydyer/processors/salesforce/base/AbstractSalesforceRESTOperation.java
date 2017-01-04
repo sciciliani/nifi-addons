@@ -33,6 +33,7 @@ import org.apache.nifi.processor.Relationship;
 import org.apache.nifi.processor.exception.ProcessException;
 
 import com.jeremydyer.nifi.salesforce.SalesforceUserPassAuthentication;
+import org.apache.nifi.logging.ComponentLog;
 
 /**
  * Created by jdyer on 8/4/16.
@@ -57,8 +58,9 @@ public class AbstractSalesforceRESTOperation
             .description("Operation failed")
             .build();
 
-    protected static final String SALESFORCE_VERSION = "v36.0";
-    protected static final String SALESFORCE_URL_BASE = "https://test.salesforce.com/";
+    protected static final String SALESFORCE_URL_BASE = "https://na8.salesforce.com/";
+    protected static final String SALESFORCE_API_ROUTE = "services/data/";
+    protected static final String SALESFORCE_VERSION = "v29.0";
     protected static final String RESPONSE_JSON = "json";
     protected static final String RESPONSE_XML = "xml";
 
@@ -71,20 +73,22 @@ public class AbstractSalesforceRESTOperation
     protected String sendGet(String accessToken, String responseFormat, String url) throws Exception {
 
         URL obj = new URL(url);
+        
+        //getLogger().debug("\nSending 'GET' request to URL : " + url);
+        System.out.println("\nSending 'GET' request to URL : " + url);
         HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
 
         // optional default is GET
         con.setRequestMethod("GET");
 
         //Add headers
-        con.setRequestProperty("Authorization: Bearer ", accessToken);
-        con.setRequestProperty("Content-Type",
-                "application/x-www-form-urlencoded");
+        con.setRequestProperty("Authorization", "Bearer " + accessToken);
+
 
         int responseCode = con.getResponseCode();
-        getLogger().info("\nSending 'GET' request to URL : " + url);
-        getLogger().info("Response Code : " + responseCode);
 
+        //getLogger().debug("Response Code : " + responseCode);
+        System.out.println("Response Code : " + responseCode);
         BufferedReader in = new BufferedReader(
                 new InputStreamReader(con.getInputStream()));
         String inputLine;
@@ -96,7 +100,8 @@ public class AbstractSalesforceRESTOperation
         in.close();
 
         //print result
-        getLogger().info(response.toString());
+        //getLogger().debug(response.toString());
+        System.out.println(response.toString());
         return response.toString();
 
     }
@@ -147,12 +152,14 @@ public class AbstractSalesforceRESTOperation
     protected String generateSalesforceURL(String apiEndpoint) {
         StringBuilder url = new StringBuilder();
         url.append(SALESFORCE_URL_BASE);
+        url.append(SALESFORCE_API_ROUTE);
         url.append(SALESFORCE_VERSION);
         url.append("/");
         url.append(apiEndpoint);
 
         try {
-            return URLEncoder.encode(url.toString(), "UTF-8");
+        	return url.toString();
+//            return URLEncoder.encode(url.toString(), "UTF-8");
         } catch (Exception ex) {
             ex.printStackTrace();
         }

@@ -37,6 +37,7 @@ import org.apache.nifi.processor.Relationship;
 import org.apache.nifi.processor.exception.ProcessException;
 import org.apache.nifi.processor.io.OutputStreamCallback;
 import org.apache.nifi.processor.util.StandardValidators;
+import org.apache.nifi.logging.ComponentLog;
 
 import com.jeremydyer.nifi.salesforce.SalesforceUserPassAuthentication;
 import com.jeremydyer.processors.salesforce.base.AbstractSalesforceRESTOperation;
@@ -48,26 +49,28 @@ import com.jeremydyer.processors.salesforce.base.AbstractSalesforceRESTOperation
 public class SObjectGetUpdatedProcessor
     extends AbstractSalesforceRESTOperation {
 
-    private static final String SALESFORCE_OP = "sobject";
+    private static final String SALESFORCE_OP = "sobjects";
 
     public static final PropertyDescriptor SOBJECT_NAME = new PropertyDescriptor
-            .Builder().name("SObject that will be interrogated for deleted records")
-            .description("Salesforce SObject name that we are looking for deleted objects for.")
+            .Builder().name("SObject that will be interrogated for updated records")
+            .description("Salesforce SObject name that we are looking for updated objects for.")
             .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
             .expressionLanguageSupported(true)
             .required(true)
             .build();
 
-    public static final PropertyDescriptor START_DATE = new PropertyDescriptor
-            .Builder().name("SObject deleted start date")
-            .description("ISO 8601 formatted start date for looking for deleted records.")
+    public static final PropertyDescriptor USTART_DATE = new PropertyDescriptor
+            .Builder().name("Updated Min date")
+            .description("ISO 8601 formatted start date for looking for updated records.")
+            .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
             .required(true)
             .expressionLanguageSupported(true)
             .build();
 
-    public static final PropertyDescriptor END_DATE = new PropertyDescriptor
-            .Builder().name("SObject deleted end date")
+    public static final PropertyDescriptor UEND_DATE = new PropertyDescriptor
+            .Builder().name("Updated Max date")
             .description("ISO 8601 formatted end date for looking for deleted records.")
+            .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
             .required(true)
             .expressionLanguageSupported(true)
             .build();
@@ -81,8 +84,8 @@ public class SObjectGetUpdatedProcessor
         final List<PropertyDescriptor> descriptors = new ArrayList<PropertyDescriptor>();
         descriptors.add(SALESFORCE_AUTH_SERVICE);
         descriptors.add(SOBJECT_NAME);
-        descriptors.add(START_DATE);
-        descriptors.add(END_DATE);
+        descriptors.add(USTART_DATE);
+        descriptors.add(UEND_DATE);
         this.descriptors = Collections.unmodifiableList(descriptors);
 
         final Set<Relationship> relationships = new HashSet<Relationship>();
@@ -115,9 +118,9 @@ public class SObjectGetUpdatedProcessor
         try {
 
             String endpoint = SALESFORCE_OP + "/" + context.getProperty(SOBJECT_NAME).evaluateAttributeExpressions().getValue() + "/updated/?start="
-                    + context.getProperty(START_DATE).evaluateAttributeExpressions().getValue() + "&end=" + context.getProperty(END_DATE).evaluateAttributeExpressions().getValue();
+                    + context.getProperty(USTART_DATE).evaluateAttributeExpressions().getValue() + "&end=" + context.getProperty(UEND_DATE).evaluateAttributeExpressions().getValue();
 
-
+            System.out.println("\nGetUpdatedProcessor: " +  generateSalesforceURL(endpoint));
             final String responseJson = sendGet(sfAuthService.getSalesforceAccessToken(), RESPONSE_JSON, generateSalesforceURL(endpoint));
 
             FlowFile ff = session.write(flowFile, new OutputStreamCallback() {
