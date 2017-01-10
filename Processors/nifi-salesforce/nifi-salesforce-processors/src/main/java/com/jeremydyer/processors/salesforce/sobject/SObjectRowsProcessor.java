@@ -105,11 +105,13 @@ public class SObjectRowsProcessor
 
         try {
 
-            String endpoint = SALESFORCE_OP + "/" + context.getProperty(SOBJECT_NAME).evaluateAttributeExpressions().getValue() + "/"
-                    + context.getProperty(SOBJECT_ROW_ID).evaluateAttributeExpressions().getValue();
+            String endpoint = SALESFORCE_OP + "/" + context.getProperty(SOBJECT_NAME).evaluateAttributeExpressions(flowFile).getValue() + "/"
+                    + context.getProperty(SOBJECT_ROW_ID).evaluateAttributeExpressions(flowFile).getValue();
 
+	    System.out.println("SOBJECT_ROW_ID: " + context.getProperty(SOBJECT_ROW_ID).evaluateAttributeExpressions(flowFile).getValue());
 
             final String responseJson = sendGet(sfAuthService.getSalesforceAccessToken(), RESPONSE_JSON, generateSalesforceURL(endpoint));
+            System.out.println("\nRequest: " + endpoint + "\nResponse: " + responseJson);
 
             FlowFile ff = session.write(flowFile, new OutputStreamCallback() {
                 @Override

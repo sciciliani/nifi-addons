@@ -117,8 +117,8 @@ public class SObjectGetUpdatedProcessor
 
         try {
 
-            String endpoint = SALESFORCE_OP + "/" + context.getProperty(SOBJECT_NAME).evaluateAttributeExpressions().getValue() + "/updated/?start="
-                    + context.getProperty(USTART_DATE).evaluateAttributeExpressions().getValue() + "&end=" + context.getProperty(UEND_DATE).evaluateAttributeExpressions().getValue();
+            String endpoint = SALESFORCE_OP + "/" + context.getProperty(SOBJECT_NAME).evaluateAttributeExpressions(flowFile).getValue() + "/updated/?start="
+                    + context.getProperty(USTART_DATE).evaluateAttributeExpressions(flowFile).getValue() + "&end=" + context.getProperty(UEND_DATE).evaluateAttributeExpressions(flowFile).getValue();
 
             System.out.println("\nGetUpdatedProcessor: " +  generateSalesforceURL(endpoint));
             final String responseJson = sendGet(sfAuthService.getSalesforceAccessToken(), RESPONSE_JSON, generateSalesforceURL(endpoint));

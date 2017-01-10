@@ -96,9 +96,14 @@ public class SalesforceQueryProcessor
 
         try {
 
-            String endpoint = SALESFORCE_OP + "/?q=" + context.getProperty(SOQL).evaluateAttributeExpressions().getValue();
+            String endpoint = SALESFORCE_OP + "/?q=" + context.getProperty(SOQL).evaluateAttributeExpressions(flowFile).getValue();
             final String responseJson = sendGet(sfAuthService.getSalesforceAccessToken(), RESPONSE_JSON, generateSalesforceURL(endpoint));
 
+//	    JSONObject jsonObj = new JSONObject(responseJson);
+//	    jsonObj.getString('done')
+//	    if (jsonObj.getString('done') == "false") {
+
+//	    }
             FlowFile ff = session.write(flowFile, new OutputStreamCallback() {
                 @Override
                 public void process(OutputStream outputStream) throws IOException {

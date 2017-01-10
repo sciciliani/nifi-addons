@@ -120,8 +120,8 @@ public class SObjectGetDeletedProcessor
 
         try {
 
-            String endpoint = SALESFORCE_OP + "/" + context.getProperty(SOBJECT_NAME).evaluateAttributeExpressions().getValue() + "/deleted/?start="
-                    + context.getProperty(START_DATE).evaluateAttributeExpressions().getValue() + "&end=" + context.getProperty(END_DATE).evaluateAttributeExpressions().getValue();
+            String endpoint = SALESFORCE_OP + "/" + context.getProperty(SOBJECT_NAME).evaluateAttributeExpressions(flowFile).getValue() + "/deleted/?start="
+                    + context.getProperty(START_DATE).evaluateAttributeExpressions(flowFile).getValue() + "&end=" + context.getProperty(END_DATE).evaluateAttributeExpressions(flowFile).getValue();
 
 
             final String responseJson = sendGet(sfAuthService.getSalesforceAccessToken(), RESPONSE_JSON, generateSalesforceURL(endpoint));
