@@ -39,6 +39,8 @@ import org.apache.nifi.processor.util.StandardValidators;
 
 import com.jeremydyer.nifi.salesforce.SalesforceUserPassAuthentication;
 import com.jeremydyer.processors.salesforce.base.AbstractSalesforceRESTOperation;
+import org.json.*;
+
 
 @Tags({"salesforce", "soql", "sobject", "query"})
 @CapabilityDescription("Executes the specified SOQL query")
@@ -91,26 +93,44 @@ public class SalesforceQueryProcessor
             return;
         }
 
+        
         final SalesforceUserPassAuthentication sfAuthService = context.getProperty(SALESFORCE_AUTH_SERVICE)
                 .asControllerService(SalesforceUserPassAuthentication.class);
 
         try {
-
+        	FlowFile ff = null;
+        	
             String endpoint = SALESFORCE_OP + "/?q=" + context.getProperty(SOQL).evaluateAttributeExpressions(flowFile).getValue();
             final String responseJson = sendGet(sfAuthService.getSalesforceAccessToken(), RESPONSE_JSON, generateSalesforceURL(endpoint));
-
-//	    JSONObject jsonObj = new JSONObject(responseJson);
-//	    jsonObj.getString('done')
-//	    if (jsonObj.getString('done') == "false") {
-
-//	    }
-            FlowFile ff = session.write(flowFile, new OutputStreamCallback() {
+//            ff = session.clone(flowFile);
+            
+            ff = session.write(flowFile, new OutputStreamCallback() {
                 @Override
                 public void process(OutputStream outputStream) throws IOException {
                     outputStream.write(responseJson.getBytes());
                 }
             });
             session.transfer(ff, REL_SUCCESS);
+            
+            JSONObject j = new JSONObject(responseJson);
+	            
+			System.out.println("Records: " + j.getJSONArray("records").length());
+			while(j.getBoolean("done") != true) {
+				endpoint = getSalesforceURL() + j.getString("nextRecordsUrl");
+				final String responseJsonX = sendGet(sfAuthService.getSalesforceAccessToken(), RESPONSE_JSON, endpoint);
+				
+				ff = session.clone(flowFile);
+	            ff = session.write(flowFile, new OutputStreamCallback() {
+	                @Override
+	                public void process(OutputStream outputStream) throws IOException {
+	                    outputStream.write(responseJsonX.getBytes());
+	                }
+	            });
+	            session.transfer(ff, REL_SUCCESS);
+				
+				j = new JSONObject(responseJson);				
+			}
+			session.commit();
         } catch (Exception ex) {
             getLogger().error(ex.getMessage());
             session.transfer(flowFile, REL_FAILURE);

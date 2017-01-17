@@ -58,8 +58,8 @@ public class AbstractSalesforceRESTOperation
             .description("Operation failed")
             .build();
 
-    protected static final String SALESFORCE_URL_BASE = "https://na8.salesforce.com/";
-    protected static final String SALESFORCE_API_ROUTE = "services/data/";
+    protected static final String SALESFORCE_URL_BASE = "https://na30.salesforce.com";
+    protected static final String SALESFORCE_API_ROUTE = "/services/data/";
     protected static final String SALESFORCE_VERSION = "v29.0";
     protected static final String RESPONSE_JSON = "json";
     protected static final String RESPONSE_XML = "xml";
@@ -147,7 +147,9 @@ public class AbstractSalesforceRESTOperation
         System.out.println(response.toString());
         return response.toString();
     }
-
+    protected String getSalesforceURL() {
+    	return SALESFORCE_URL_BASE;
+    }
 
     protected String generateSalesforceURL(String apiEndpoint) {
         StringBuilder url = new StringBuilder();
